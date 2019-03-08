@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="layout :: head(title=~{::title},links=~{})">
+<title>Delete User</title>
+</head>
+<body th:include="layout :: body" th:with="content=~{::content}">
+	<div th:fragment="content">
+		<script th:inline="javascript">
+	      var app = angular.module('myApp', []);
+	        app.controller('deleteUserCtrl', ['$scope', '$http',
+	            function ($scope, $http) {
+	                update = function () {
+	                    $http.get("/iTrust2/api/v1/users").then(
+	                            function (response) {
+	                                $scope.users = response.data;
+	                                console.log($scope.users);
+	                            });
+	                };
+
+	                update();
+
+	                $scope.submit = function (user) {
+	                    $http.delete("/iTrust2/api/v1/delusers/" + user.username).then(
+	                            function (response) {
+	                                $scope.message = "User deleted successfully";
+	                                console.log(response);
+	                                update();
+	                            },
+	                            function (rejection) {
+	                                $scope.message = "Error while deleting the user";
+	                                console.log(rejection);
+	                                update();
+	                            });
+	                };
+	            }]);
+	      </script>
+     <div ng-controller="deleteUserCtrl" ng-app="myApp">
+        <h1>Delete User</h1>
+        <hr />
+        <table style="margin:0">
+          <tr>
+            <td>
+              <select name ="list" ng-model="selectedUser" ng-options="user.username for user in users" class="form-control"/></select>
+            </td>
+            <td>
+              <button type="submit" id="submit" ng-click="submit(selectedUser)" name="submit" class="btn btn-default">Delete</button>
+            </td>
+          </tr>
+        </table>
+        <div name="success">{{message}}</div>
+      </div>
+    </div>
+  </body>
+</html>

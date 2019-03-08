@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="layout :: head(title=~{::title},links=~{})">
+<title>Delete Diagnosis</title>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+</head>
+<body th:include="layout :: body" th:with="content=~{::content}">
+	<div th:fragment="content">
+	      <script th:inline="javascript">
+	      var app = angular.module('myApp', []);
+	        app.controller('deleteDiagCtrl', ['$scope', '$http',
+	            function ($scope, $http) {
+	                update = function () {
+	                    $http.get("/iTrust2/api/v1/diagnosis").then(
+	                            function (response) {
+	                                $scope.diagnoses = response.data;
+	                                console.log($scope.diagnoses);
+	                            });
+	                };
+
+	                update();
+
+	                $scope.submit = function (diagnosis) {
+	                    $http.delete("/iTrust2/api/v1/diagnoses/" + diagnosis.icdCode).then(
+	                            function (response) {
+	                                $scope.message = "Diagnosis deleted successfully";
+	                                console.log(response);
+	                                update();
+	                            },
+	                            function (rejection) {
+	                                $scope.message = "Error while deleting the diagnosis";
+	                                console.log(rejection);
+	                                update();
+	                            });
+	                };
+	            }]);
+	      </script>
+     <div ng-controller="deleteDiagCtrl" ng-app="myApp">
+        <h1>Delete Diagnosis</h1>
+        <hr />
+        <table style="margin:0">
+          <tr>
+            <td>
+              <select name ="list" ng-model="selectedDiag" ng-options="diagnosis.diagnosisName +   ' | ' +   diagnosis.icdCode for diagnosis in diagnoses" class="form-control"/></select>
+            </td>
+            <td>
+              <button ng-click="submit(selectedDiag)" name="submit" class="btn btn-default">Delete</button>
+            </td>
+          </tr>
+        </table>
+        <div name="success">{{message}}</div>
+      </div>
+    </div>
+  </body>
+</html>
+	      

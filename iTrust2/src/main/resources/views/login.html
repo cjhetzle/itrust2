@@ -1,0 +1,104 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:tiles="http://www.thymeleaf.org">
+  <head>
+    <title tiles:fragment="title">iTrust2 :: Login</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+      body {
+          /*background-image: url("http://i.imgur.com/4m4xXEF.jpg");*/
+          background-color: #333333; /*Backup for image*/
+          background-image: url("https://image.ibb.co/f0Z2fw/surgeon_ducks.jpg");
+          background-size: cover;
+      }
+      .login {
+          background: #151515; /*For browsers that don't support gradients*/
+          background: linear-gradient(#151515, #202020, #252525);
+          color: white;
+          text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+          margin: auto;
+          display:inline-block;
+          position:fixed;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          max-width: 380px;
+          max-height: 310px;
+          border-style: groove;
+          border-width: 3px;
+          border-radius: 8px;
+          box-shadow: -10px 10px 5px #101010;
+          padding-top: 5px;
+          padding-left: 10px;
+          padding-right: 10px;
+      }
+      a:link {
+          color: white;
+      }
+      a:hover {
+          color: #606060;
+      }
+    </style>
+  </head>
+  <body>
+    <div tiles:fragment="content">
+      <script type="text/javascript">
+        function fillLoginFields(u, p) {
+            document.getElementById("username").value = u;
+            document.getElementById("password").value = p;
+            document.forms[0].submit();
+        }
+      </script>
+
+      <div class="login">
+        <form name="f" th:action="@{/login}" method="post">
+          <fieldset>
+            <legend style="color: white">iTrust2 :: Login</legend>
+            <div class="form-group">
+              <label for="username">Username:</label>
+              <input type="text" id="username" name="username" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label for="password">Password:</label>
+              <input type="password" id="password" name="password" class="form-control" />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" style="float: left">Log in</button>
+              <a class="iTrust2TestNavlink"
+                 href="password/forgotPassword" style="color: #4bb1cf; font-size:14px; padding-top:15px; float: right"
+                 id="forgotpassword">Forgot Password?</a>
+            </div>
+          </fieldset>
+        </form>
+
+        <table style="width: 100%;" id="sampleLoginTable" class="logintable">
+          <tr>
+            <td><a class="iTrust2TestNavlink"
+                   onclick="fillLoginFields('hcp', '123456')"
+                   href="javascript:void(0)">HCP</a></td>
+            <td><a class="iTrust2TestNavlink"
+                   onclick="fillLoginFields('patient', '123456')"
+                   href="javascript:void(0)">Patient</a></td>
+          </tr>
+          <tr>
+            <td><a class="iTrust2TestNavlink"
+                   onclick="fillLoginFields('admin', '123456')"
+                   href="javascript:void(0)">Admin</a></td>
+            <td><a class="iTrust2TestNavlink" onclick="fillLoginFields('null', 'null')"
+                   href="javascript:void(0)">Placeholder (doesn't work)</a></td>
+          </tr>
+        </table>
+
+      </div>
+
+        <div style="color: #a9302a; height:50px; line-height:35px; bottom: 450px; text-align: center; font-size: 20px" th:if="${param.error}" class="login">
+          Invalid username and password.
+        </div>
+        <div style="color: #0480be; height:50px; line-height:35px; bottom: 450px; text-align: center; font-size: 20px" th:if="${param.logout}" class="login">
+          You have been logged out.
+        </div>
+    </div>
+  </body>
+</html>

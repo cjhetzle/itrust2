@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:include="layout :: head(title=~{::title},links=~{})">
+    <title>Add Drug</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  </head>
+  <body th:include="layout :: body" th:with="content=~{::content}">
+    <div th:fragment="content">
+      <script th:inline="javascript">
+        var app = angular.module('myApp', []);
+        app.controller('addDrugCtrl', ['$scope', '$http',
+            function ($scope, $http) {
+                $scope.showErrors = false;
+                $scope.submit = function () {
+                    $scope.showErrors = true;
+                    $scope.drug.status = "PENDING";
+                    $http({
+                        method: 'POST',
+                        url: '/iTrust2/api/v1/drugs',
+                        data: $scope.drug
+                    }).then(function (response) {
+                        $scope.message = "Drug created successfully";
+                        console.log(response);
+                        $scope.drug = {};
+                        $scope.showErrors = false;
+                    }, function (rejection) {
+                        $scope.message = "Error occurred creating drug";
+                        console.log(rejection);
+                    });
+                };
+            }]);
+      </script>
+      <div ng-controller="addDrugCtrl" ng-app="myApp">
+        <div ng-if="showErrors">
+          <style type="text/css">
+            input:invalid {
+                box-shadow: 0 0 3px red;
+            }
+          </style>
+        </div>
+        <h1>Add Drug</h1>
+        <hr />
+        <table>
+          <tr>
+            <td>Name:&nbsp;&nbsp;&nbsp;</td>
+            <td>
+              <input type="text" name="name" required ng-model="drug.name" class="form-control" />
+            </td>
+          </tr>
+          <tr>
+            <td>NDC:</td>
+            <td>
+              <input type="text" name="ndc" pattern="[0-9]{4}-[0-9]{4}-[0-9]{2}"
+                     placeholder="0000-0000-00" ng-model="drug.ndc" class="form-control" required />
+            </td>
+          </tr>
+        </table>
+        <button ng-click="submit()" name="submit" class="btn btn-default">Submit Drug</button>
+        <div name="success">{{message}}</div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:include="layout :: head(title=~{::title},links=~{})">
+    <title>Assign Prescription</title>
+    <!--    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>-->
+  </head>
+  <body th:include="layout :: body" th:with="content=~{::content}">
+    <div th:fragment="content">
+      <script th:inline="javascript">
+        var app = angular.module('myApp', []);
+        app.controller('assignPrescriptionCtrl', ['$scope', '$http',
+            function ($scope, $http) {
+                $scope.showErrors = false;
+
+                $http.get("/iTrust2/api/v1/drugs").then(
+                        function (response) {
+                            $scope.drugs = response.data;
+                        });
+
+                $http.get("/iTrust2/api/v1/patients").then(
+                        function (response) {
+                            $scope.patients = response.data;
+                        });
+
+                $scope.submit = function () {
+                    $scope.showErrors = true;
+                    $scope.prescription.hcp = /*[[${#httpServletRequest.remoteUser}]]*/null;
+                    $scope.prescription.status = "PENDING";
+                    $http({
+                        method: 'POST',
+                        url: '/iTrust2/api/v1/prescriptions',
+                        data: $scope.prescription
+                    }).then(function (response) {
+                        $scope.message = "Prescription created successfully";
+                        $scope.prescription = {};
+                        $scope.showErrors = false;
+                        console.log(response);
+                    }, function (rejection) {
+                        $scope.message = "Error occurred creating prescription";
+                        console.log(rejection);
+                    });
+                };
+            }]);
+      </script>
+      <div ng-controller="assignPrescriptionCtrl" ng-app="myApp">
+        <div ng-if="showErrors">
+          <style type="text/css">
+            input:invalid {
+                box-shadow: 0 0 3px red;
+            }
+          </style>
+        </div>
+        <h1>Assign Prescription</h1>
+        <hr />
+        <table>
+          <tr>
+            <td>Drug:</td>
+            <td>
+              <select ng-model="prescription.drug" id="drug"
+                      ng-options="drug.name +    ' | ' +    drug.ndc for drug in drugs"
+                      class="form-control" required />
+            </td>
+          </tr>
+          <tr>
+            <td>Patient:</td>
+            <td>
+              <select ng-model="prescription.patient" id="patient"
+                      ng-options="patient.self.username + ' | ' + patient.firstName + ' ' +  patient.lastName for patient in patients"
+                      class="form-control" required />
+            </td>
+          </tr>
+          <tr>
+            <td>Dosage:</td>
+            <td>
+              <input type="number" ng-model="prescription.dosage" name="dosage" id='dosage' min="1" class="form-control" required />
+            </td>
+          </tr>
+          <tr>
+            <td>Renewals:</td>
+            <td>
+              <input type="number" ng-model="prescription.renewals" name="renewals" id='renewals' min="0" class="form-control" required />
+            </td>
+          </tr>
+          <tr>
+            <td>Start Date:&nbsp;&nbsp;&nbsp;</td>
+            <td>
+              <!-- Pattern for date found at: http://html5pattern.com/Dates -->
+              <input type="text" ng-model="prescription.startDate" name="startDate"
+                     pattern="(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d" placeholder="MM/DD/YYYY"
+                     class="form-control" required />
+            </td>
+          </tr>
+          <tr>
+            <td>End Date:</td>
+            <td>
+              <input type="text" ng-model="prescription.endDate" name="endDate"
+                     pattern="(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d" placeholder="MM/DD/YYYY"
+                     class="form-control" required />
+            </td>
+          </tr>
+          <tr>
+            <td>Notes:</td>
+            <td style="resize:both">
+              <textarea ng-model="prescription.notes" name="notes" class="form-control" rows="2" cols="30" style="overflow: auto">
+              </textarea>
+            </td>
+          </tr>
+        </table>
+        <button ng-click="submit()" name="submit" class='btn btn-default'>Submit Prescription</button>
+        <div name="success">{{message}}</div>
+      </div>
+    </div>
+  </body>
+</html>

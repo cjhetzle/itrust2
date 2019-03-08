@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:include="layout :: head(title=~{::title},links=~{})">
+    <title>View Prescriptions</title>
+  </head>
+  <body th:include="layout :: body" th:with="content=~{::content}">
+    <div th:fragment="content">
+      <script th:inline="javascript">
+        var app = angular.module('myApp', []);
+        app.controller('viewPrescriptionCtrl', ['$scope', '$http',
+            function ($scope, $http) {
+                $http.get("/iTrust2/api/v1/prescriptions/myprescriptions").then(
+                        function (response) {
+                            $scope.prescriptions = response.data;
+                            console.log($scope.prescriptions);
+                        });
+                $scope.showData = false;
+            }]);
+      </script>
+      <div ng-controller="viewPrescriptionCtrl" ng-app="myApp">
+        <h1>View Prescriptions</h1>
+        <hr />
+          <table>
+            <tr>
+              <td>
+                <select ng-model="selectedPrescription" ng-options="prescription.drug.name +    ' | '
+                                      +    (prescription.startDate.month +    1) +    '/' +    prescription.startDate.dayOfMonth +    '/'
+                                      +    prescription.startDate.year +    ' - ' +    (prescription.endDate.month +    1) +    '/'
+                                      +    prescription.endDate.dayOfMonth +    '/' +    prescription.endDate.year
+          for prescription in prescriptions" ng-click="showData = false" class="form-control" /></select>
+              </td>
+              <td>
+                <button ng-click="showData = true" class="btn btn-default">Display Prescription</button>
+              </td>
+            </tr>
+          </table>
+          <hr />
+          <div ng-show="showData && selectedPrescription != null">
+            <table style="margin-left:30px">
+              <tr>
+                <td><strong>Drug:</strong></td>
+                <td id="drug">
+                  {{selectedPrescription.drug.name}} | {{selectedPrescription.drug.ndc}}
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Dosage:</strong></td>
+                <td id="dosage">
+                  {{selectedPrescription.dosage}} mg
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Renewals:</strong></td>
+                <td id="renewals">
+                  {{selectedPrescription.renewals}}
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Start Date:&nbsp;&nbsp;&nbsp;</strong></td>
+                <td id="startdate">
+                  {{(selectedPrescription.startDate.month + 1)}}/{{selectedPrescription.startDate.dayOfMonth}}/{{selectedPrescription.startDate.year}}
+                </td>
+              </tr>
+              <tr>
+                <td><strong>End Date:</strong></td>
+                <td>
+                  {{(selectedPrescription.endDate.month + 1)}}/{{selectedPrescription.endDate.dayOfMonth}}/{{selectedPrescription.endDate.year}}
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Notes:</strong></td>
+                <td style="max-width:500px">
+                  {{selectedPrescription.notes}}
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+  </body>
+</html>

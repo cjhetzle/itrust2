@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:include="layout :: head(title=~{::title},links=~{})">
+    <title>Delete Prescription</title>
+  </head>
+  <body th:include="layout :: body" th:with="content=~{::content}">
+    <div th:fragment="content">
+      <script th:inline="javascript">
+        var app = angular.module('myApp', []);
+        app.controller('deletePrescriptionCtrl', ['$scope', '$http',
+            function ($scope, $http) {
+                update = function () {
+                    $http.get("/iTrust2/api/v1/prescriptions").then(
+                            function (response) {
+                                $scope.prescriptions = response.data;
+                                console.log($scope.prescriptions);
+                            });
+                };
+
+                update();
+
+                $scope.submit = function (prescription) {
+                    $http.delete("/iTrust2/api/v1/prescriptions/" + prescription.id).then(
+                            function (response) {
+                                $scope.message = "Prescription deleted successfully";
+                                console.log(response);
+                                update();
+                            },
+                            function (rejection) {
+                                $scope.message = "Error while deleting the prescription";
+                                console.log(rejection);
+                                update();
+                            });
+                };
+            }]);
+      </script>
+      <div ng-controller="deletePrescriptionCtrl" ng-app="myApp">
+        <h1>Delete Prescription</h1>
+        <hr />
+          <table style="margin: 0">
+            <tr>
+              <td>
+                <select name="list" id="select" ng-model="selectedPrescription" ng-options="prescription.patient.username + ' | ' + prescription.drug.ndc + ' | '
+                                      +   (prescription.startDate.month +   1) +   '/' +   prescription.startDate.dayOfMonth +   '/'
+                                      +   prescription.startDate.year +   ' - ' +   (prescription.endDate.month +   1) +   '/'
+                                      +   prescription.endDate.dayOfMonth +   '/' +   prescription.endDate.year
+          for prescription in prescriptions" class="form-control" /></select>
+              </td>
+              <td>
+                <button ng-click="submit(selectedPrescription)" name="submit" class="btn btn-default">Delete</button>
+              </td>
+            </tr>
+          </table>
+          <div name="success">{{message}}</div>
+      </div>
+    </div>
+  </body>
+</html>

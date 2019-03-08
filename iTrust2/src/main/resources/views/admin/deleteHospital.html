@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="layout :: head(title=~{::title},links=~{})">
+<title>Delete Hospital</title>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+</head>
+<body th:include="layout :: body" th:with="content=~{::content}">
+	<div th:fragment="content">
+	<script th:inline="javascript">
+	      var app = angular.module('myApp', []);
+	        app.controller('deleteHospitalCtrl', ['$scope', '$http',
+	            function ($scope, $http) {
+	                update = function () {
+	                    $http.get("/iTrust2/api/v1/hospitals").then(
+	                            function (response) {
+	                                $scope.hospitals = response.data;
+	                                console.log($scope.hospitals);
+	                            });
+	                };
+
+	                update();
+
+	                $scope.submit = function (hospital) {
+	                    $http.delete("/iTrust2/api/v1/hospitals/" + hospital.name).then(
+	                            function (response) {
+	                                $scope.message = "Hospital deleted successfully";
+	                                console.log(response);
+	                                update();
+	                            },
+	                            function (rejection) {
+	                                $scope.message = "Error while deleting the hospital";
+	                                console.log(rejection);
+	                                update();
+	                            });
+	                };
+	            }]);
+	      </script>
+	<div ng-controller="deleteHospitalCtrl" ng-app="myApp">
+        <h1>Delete Hospital</h1>
+        <hr />
+        <table style="margin:0">
+          <tr>
+            <td>
+              <select name ="list" ng-model="selectedHospital" ng-options="hospital.name for hospital in hospitals" class="form-control"/></select>
+            </td>
+            <td>
+              <button type="submit" id="submit" ng-click="submit(selectedHospital)" name="submit" class="btn btn-default">Delete</button>
+            </td>
+          </tr>
+        </table>
+        <div name="success">{{message}}</div>
+      </div>
+    </div>
+  </body>
+</html>

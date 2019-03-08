@@ -1,0 +1,221 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="layout :: head(title=~{::title},links=~{})">
+<title>Edit My Demographics</title>
+</head>
+<body th:include="layout :: body" th:with="content=~{::content}">
+
+
+	<div th:fragment="content">
+	<script th:inline="javascript">
+        var app = angular.module('myApp', []);
+        app.controller('editDemographicsCtrl',
+        	function ($scope, $http) {
+        	$scope.showErrors = false;
+        	
+        	  $http.get("/iTrust2/api/v1/state").then(
+        			  function(response) {
+        				  $scope.states = response.data;
+        			  });
+        	  
+        	  $http.get("/iTrust2/api/v1/ethnicity").then(
+        			  function(response) {
+        				  $scope.ethnicities = response.data;
+        			  });
+        	  
+        	  $http.get("/iTrust2/api/v1/gender").then(
+        			  function(response) {
+        				  $scope.genders = response.data;
+        			  });
+        	  
+        	  $scope.update = function() {
+        	      $http.get("/iTrust2/api/v1/patients").then(
+						function(response) {
+							$scope.patients = response.data;
+						});
+        	  };
+        	  $scope.update();
+        	  
+        	  $http.get("/iTrust2/api/v1/bloodtype").then(
+						function(response) {
+							$scope.bloodTypes = response.data;
+						});
+        	  
+        	  $scope.fill = function(actualPatient) {
+        		  $scope.patient = {};
+        		  $scope.patient.self = actualPatient.self.username;
+        		  $scope.patient.firstName = actualPatient.firstName;
+        		  $scope.patient.lastName = actualPatient.lastName;
+        		  $scope.patient.preferredName = actualPatient.preferredName;
+        		  if(actualPatient.mother != null) {
+        		  	$scope.patient.mother = actualPatient.mother.username;
+        		  }
+        		  if(actualPatient.father != null) {
+        		    $scope.patient.father = actualPatient.father.username;
+        		  }
+        		  $scope.patient.email = actualPatient.email;
+        		  $scope.patient.address1 = actualPatient.address1;
+        		  $scope.patient.address2 = actualPatient.address2;
+        		  $scope.patient.city = actualPatient.city;
+        		  $scope.patient.state = actualPatient.state;
+        		  $scope.patient.zip = actualPatient.zip;
+        		  $scope.patient.phone = actualPatient.phone;
+        		  if(actualPatient.dateOfBirth != null) {
+        		    $scope.patient.dateOfBirth = (actualPatient.dateOfBirth.month + 1) + "/" + actualPatient.dateOfBirth.dayOfMonth + "/" + actualPatient.dateOfBirth.year;
+        		  }
+        		  $scope.patient.bloodType = actualPatient.bloodType;
+        		  $scope.patient.ethnicity = actualPatient.ethnicity;
+        		  $scope.patient.gender = actualPatient.gender;
+              };
+        	  
+        	  $scope.submit = function() {
+        		  $scope.showErrors = true;
+        		  
+        		  $http({
+        			  method: 'PUT',
+        			  url: '/iTrust2/api/v1/patients/' + $scope.patient.self,
+        			  data: $scope.patient
+        		  }).then(function (response) {
+        			  $scope.message = "Demographics updated successfully";
+        			  console.log(response);
+        			  $scope.showErrors = false;
+        			  $scope.update();
+        		  }, function (rejection) {
+        			  $scope.message = "Error occured when editing demographics: Please check fields";
+        			  console.log(rejection);
+        		  });
+        		  
+        	  };
+        });
+      </script>
+		<div ng-controller="editDemographicsCtrl" ng-app="myApp">
+		<div ng-if="showErrors">
+			<style>
+				input:invalid {
+					box-shadow: 0 3px red;
+				}
+			</style>
+		</div>
+			<h2>Patients:</h2>
+			<select id="selectedpatient" ng-change="fill(actualPatient)" ng-model="actualPatient" ng-options="patient.self.username + ': ' + patient.firstName + ' ' + patient.lastName for patient in patients" class="form-control"/></select>
+        <h1>Edit {{patient.firstName}}'s Demographics</h1>
+        <table>
+          <tr>
+            <td>First Name:</td>
+            <td>
+              <input type="text" name="firstName" pattern="[A-Za-z-' ]{0,20}" required
+              ng-model="patient.firstName" placeholder="[A-Za-z-' ]{0,30}" />
+            </td>
+          </tr>
+          <tr>
+            <td>Last Name:</td>
+            <td>
+              <input type="text" name="lastName" required pattern="[A-Za-z-' ]{0,30}"
+               ng-model="patient.lastName" placeholder="[A-Za-z-' ]{0,30}" />
+            </td>
+          </tr>
+          <tr>
+            <td>Preferred Name:</td>
+            <td>
+              <input type="text" name="preferredName" pattern="[A-Za-z-' ]{0,20}"
+              ng-model="patient.preferredName" placeholder="[A-Za-z-' ]{0,20}" />
+            </td>
+          </tr>
+          <tr>
+            <td>Mother (username):</td>
+            <td>
+              <input type="text" name="mother" pattern="[A-Za-z0-9]{0,20}" 
+              ng-model="patient.mother" placeholder="[A-Za-z.0-9]{0,20}" />
+            </td>
+          </tr>
+          <tr>
+            <td>Father (username):</td>
+            <td>
+              <input type="text" name="father" pattern="[A-Za-z0-9]{0,20}"
+              ng-model="patient.father" placeholder="[A-Za-z.0-9]{0,20}" />
+            </td>
+          </tr>
+          <tr>
+            <td>Email:</td>
+            <td>
+              <input type="email" name="email" required pattern="[A-Za-z._@0-9]{0,30}" 
+              ng-model="patient.email" />
+            </td>
+          </tr>
+          <tr>
+            <td>Street Address 1:</td>
+            <td>
+              <input type="text" name="address1" required pattern="[A-Za-z.0-9 ]{0,50}"
+              ng-model="patient.address1" placeholder="[A-Za-z.0-9 ]{0,50}" />
+            </td>
+          </tr>
+          <tr>
+            <td>Street Address 2:</td>
+            <td>
+              <input type="text" name="address2" pattern="[A-Za-z.0-9 ]{0,50}"
+              ng-model="patient.address2" placeholder="[A-Za-z.0-9 ]{0,50}" />
+            </td>
+          </tr>
+          <tr>
+            <td>City:</td>
+            <td>
+              <input type="text" name="city" required pattern="[A-Za-z]{0,15}"
+              ng-model="patient.city" placeholder="[A-Za-z]{0,15}" />
+            </td>
+          </tr>
+          <tr>
+            <td>State:</td>
+            <td>
+              <select ng-model="patient.state" name="state">
+              <option ng-repeat="state in states" value="{{state}}">{{state}}</option>
+            </td>
+          </tr>
+          <tr>
+            <td>Zip code:</td>
+            <td>
+              <input type="text" name="zip" required pattern="[0-9-]{5,10}"
+              ng-model="patient.zip" placeholder="##### or #####-#####" />
+            </td>
+          </tr>
+          <tr>
+            <td>Phone:</td>
+            <td>
+              <input type="text" name="phone" required pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+              ng-model="patient.phone" placeholder="###-###-#### "/>
+            </td>
+          </tr>
+          <tr>
+            <td>Date of Birth:</td>
+            <td>
+              <input type="text" name="dateOfBirth" required pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
+              ng-model="patient.dateOfBirth" placeholder="mm/dd/yyyy" />
+            </td>
+          </tr>
+          <tr>
+            <td>Blood Type:</td>
+            <td>
+               <select ng-model="patient.bloodType">
+               <option ng-repeat="bloodType in bloodTypes" value="{{bloodType}}">{{bloodType}}</option>
+               </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Ethnicity:</td>
+            <td>
+               <select ng-model="patient.ethnicity">
+               <option ng-repeat="ethnicity in ethnicities" value="{{ethnicity}}">{{ethnicity}}</option>
+               </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Gender:</td>
+            <td>
+              <select ng-model="patient.gender">
+              <option ng-repeat="gender in genders" value="{{gender}}">{{gender}}</option>
+            </td>
+          </tr>
+        </table>
+        <button ng-click="submit()" name="submit" id="editpatientdemographics">Update Demographics</button>
+        <div name="success">{{message}}</div>
+    </div>
+  </body>
+</html>
